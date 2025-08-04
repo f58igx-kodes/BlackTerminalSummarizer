@@ -14,20 +14,15 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf'}
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Load summarizer at startup
-
-
-def load_summarizer(model_name="sshleifer/distilbart-cnn-12-6"):
+def load_summarizer(model_name="t5-small"):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return pipeline("summarization", model=model, tokenizer=tokenizer)
 
-
 summarizer = load_summarizer()
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 def read_pdf(file_path):
     text = ""
@@ -41,7 +36,6 @@ def read_pdf(file_path):
         raise Exception(f"Error reading PDF: {str(e)}")
     return text
 
-
 def read_text_file(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -49,19 +43,16 @@ def read_text_file(file_path):
     except Exception as e:
         raise Exception(f"Error reading text file: {str(e)}")
 
-
 def summarize_text(summarizer, text, max_chunk=1000):
     chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
     summaries = []
     for chunk in tqdm(chunks, desc="Summarizing", unit="chunk"):
         try:
-            summary = summarizer(chunk, max_length=130, min_length=30, do_sample=False)[
-                0]['summary_text']
+            summary = summarizer(chunk, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
             summaries.append(summary)
         except Exception as e:
             raise Exception(f"Error summarizing chunk: {str(e)}")
     return "\n".join(summaries)
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -100,7 +91,6 @@ def index():
             return redirect(url_for('index'))
 
     return render_template('index.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
