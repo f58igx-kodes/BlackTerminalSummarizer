@@ -8,6 +8,7 @@ from tqdm import tqdm
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SECRET_KEY'] = 'supersecretkey123'  # Change this for production
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  # 1MB limit
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
 
 # Ensure upload folder exists
@@ -43,7 +44,7 @@ def read_text_file(file_path):
     except Exception as e:
         raise Exception(f"Error reading text file: {str(e)}")
 
-def summarize_text(summarizer, text, max_chunk=1000):
+def summarize_text(summarizer, text, max_chunk=500):
     chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
     summaries = []
     for chunk in tqdm(chunks, desc="Summarizing", unit="chunk"):
