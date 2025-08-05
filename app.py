@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 import pdfplumber
 from tqdm import tqdm
+import torch
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -44,7 +45,7 @@ def read_text_file(file_path):
     except Exception as e:
         raise Exception(f"Error reading text file: {str(e)}")
 
-def summarize_text(summarizer, text, max_chunk=500):
+def summarize_text(summarizer, text, max_chunk=300):
     chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
     summaries = []
     for chunk in tqdm(chunks, desc="Summarizing", unit="chunk"):
@@ -53,6 +54,7 @@ def summarize_text(summarizer, text, max_chunk=500):
             summaries.append(summary)
         except Exception as e:
             raise Exception(f"Error summarizing chunk: {str(e)}")
+    torch.cuda.empty_cache() if torch.cuda.is_available() else None
     return "\n".join(summaries)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -85,6 +87,7 @@ def index():
                 return redirect(url_for('index'))
 
             summary = summarize_text(summarizer, text)
+            torch.cuda.empty_cache() if torch.cuda.is_available() else None
             return render_template('result.html', summary=summary)
 
         except Exception as e:
