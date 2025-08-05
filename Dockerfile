@@ -4,8 +4,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    && pip install --no-cache-dir --verbose -r requirements.txt \
-    && apt-get purge -y build-essential \
+    libssl-dev \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y build-essential libssl-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
