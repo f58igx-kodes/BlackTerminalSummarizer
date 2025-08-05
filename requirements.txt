@@ -2,5 +2,5 @@ flask==2.3.2
 gunicorn==20.1.0
 transformers==4.45.2
 pdfplumber==0.10.2
-torch==2.5.0
+torch==2.0.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 tqdm==4.65.0
